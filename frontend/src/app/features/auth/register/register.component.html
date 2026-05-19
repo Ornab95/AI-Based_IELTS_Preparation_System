@@ -1,0 +1,344 @@
+<!-- REGISTRATION — Antigravity / Glassmorphism 8-Step Stepper -->
+<div class="min-h-screen flex items-center justify-center relative overflow-hidden py-12 px-4 sm:px-6"
+  style="background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);">
+
+  <!-- Animated background orbs -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute -top-40 -left-40 w-96 h-96 rounded-full opacity-20 animate-pulse"
+      style="background: radial-gradient(circle, #7c3aed, transparent 70%); animation-duration: 4s;"></div>
+    <div class="absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full opacity-15 animate-pulse"
+      style="background: radial-gradient(circle, #06b6d4, transparent 70%); animation-duration: 6s;"></div>
+    <div class="absolute top-1/3 right-1/4 w-64 h-64 rounded-full opacity-10 animate-pulse"
+      style="background: radial-gradient(circle, #ec4899, transparent 70%); animation-duration: 5s;"></div>
+  </div>
+
+  <!-- Success Overlay -->
+  @if (successMessage()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center"
+    style="background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);">
+    <div class="text-center p-10 rounded-3xl border border-emerald-500/20 animate-[fadeInUp_0.5s_ease-out]"
+      style="background: rgba(255,255,255,0.08); backdrop-filter: blur(24px);">
+      <div class="text-6xl mb-4">🎉</div>
+      <h2 class="text-2xl font-bold text-white mb-2">You're All Set!</h2>
+      <p class="text-emerald-300 text-sm">{{ successMessage() }}</p>
+      <p class="text-white/30 text-xs mt-3">Redirecting you shortly...</p>
+    </div>
+  </div>
+  }
+
+  <div class="relative z-10 w-full max-w-2xl mx-4 animate-[fadeInUp_0.8s_ease-out]">
+    <!-- Top glow -->
+    <div class="absolute -top-px left-8 right-8 h-px"
+      style="background: linear-gradient(90deg, transparent, rgba(124,58,237,0.5), rgba(6,182,212,0.5), transparent);">
+    </div>
+
+    <div class="rounded-3xl p-8 md:p-12 shadow-2xl border border-white/10"
+      style="background: rgba(255,255,255,0.07); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);">
+
+      <!-- Progress Bar -->
+      <div class="mb-6">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs text-white/40 font-medium">Step {{ currentStep() }} of {{ totalSteps }}</span>
+          <span class="text-xs text-purple-400 font-semibold">{{ progressPercent() }}%</span>
+        </div>
+        <div class="h-1.5 rounded-full overflow-hidden" style="background: rgba(255,255,255,0.08);">
+          <div class="h-full rounded-full transition-all duration-700 ease-out" [style.width.%]="progressPercent()"
+            style="background: linear-gradient(90deg, #7c3aed, #06b6d4);"></div>
+        </div>
+        <!-- Step dots (connected timeline) -->
+        <div class="relative mt-5 mb-7">
+          <!-- Connector Line Background -->
+          <div class="absolute top-1/2 left-3 right-3 h-0.5 bg-white/10 -translate-y-1/2 z-0"></div>
+          <!-- Active Connector Line Progress -->
+          <div class="absolute top-1/2 left-3 h-0.5 bg-gradient-to-r from-purple-500 to-cyan-500 -translate-y-1/2 z-0 transition-all duration-700 ease-out"
+            [style.width.%]="((currentStep() - 1) / (totalSteps - 1)) * 100"></div>
+
+          <!-- Step circles -->
+          <div class="relative flex justify-between z-10">
+            @for (step of steps; track step.id) {
+            <button (click)="goToStep(step.id)" type="button"
+              class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 cursor-pointer shadow-md"
+              [class]="step.id < currentStep() ? 'bg-purple-500 text-white scale-100' :
+                               step.id === currentStep() ? 'bg-gradient-to-r from-purple-500 to-cyan-500 text-white ring-4 ring-purple-500/20 scale-110 shadow-lg shadow-purple-500/20' :
+                               'bg-white/[0.08] border border-white/10 text-white/30 scale-90 hover:bg-white/[0.15] hover:text-white/60'">
+              @if (step.id < currentStep()) { <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clip-rule="evenodd" /></svg>
+                } @else {
+                {{ step.id }}
+                }
+            </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Step Header -->
+      <div class="text-center">
+        <span class="text-4xl mb-3 block">{{ currentStepConfig().icon }}</span>
+        <h2 class="text-3xl font-bold text-white tracking-tight">{{ currentStepConfig().title }}</h2>
+        <p class="text-sm text-slate-400 mt-1.5">{{ currentStepConfig().subtitle }}</p>
+      </div>
+
+      <!-- Error Message -->
+      @if (getStepError() || errorMessage()) {
+      <div class="mb-4 p-3 rounded-xl text-sm text-red-300 border border-red-500/20"
+        style="background: rgba(239,68,68,0.1);">
+        {{ getStepError() || errorMessage() }}
+      </div>
+      }
+
+      <!-- STEP CONTENT  -->
+      <div class="min-h-[240px] flex flex-col items-center justify-center mt-12">
+
+        <!-- STEP 1: Name -->
+        @if (currentStep() === 1) {
+        <div class="animate-[fadeInUp_0.4s_ease-out] w-full max-w-[400px] flex flex-col">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Full Name</mat-label>
+            <mat-icon matPrefix class="opacity-70 mr-2 text-white">person</mat-icon>
+            <input matInput id="reg-name" type="text" [ngModel]="name()" (ngModelChange)="name.set($event)" name="name"
+              placeholder="Enter your full name" autocomplete="name" />
+          </mat-form-field>
+        </div>
+        }
+
+        <!-- STEP 2: IELTS Experience -->
+        @if (currentStep() === 2) {
+        <div class="animate-[fadeInUp_0.4s_ease-out] grid grid-cols-2 gap-4 w-full max-w-[420px] -mt-4">
+          <button type="button" (click)="selectIeltsExperience(true)"
+            class="p-6 rounded-2xl border text-center transition-all duration-300 cursor-pointer hover:scale-[1.03]"
+            [class]="hasTakenIelts() === true ? 'border-purple-500/50 shadow-lg shadow-purple-500/10' : 'border-white/10 hover:border-white/20'"
+            [style.background]="hasTakenIelts() === true ? 'rgba(124,58,237,0.15)' : 'rgba(255,255,255,0.04)'">
+            <span class="text-3xl block mb-2"></span>
+            <span class="text-white font-semibold text-sm">Yes, I have</span>
+            <span class="text-white/30 text-xs block mt-1">I've taken the test</span>
+          </button>
+          <button type="button" (click)="selectIeltsExperience(false)"
+            class="p-6 rounded-2xl border text-center transition-all duration-300 cursor-pointer hover:scale-[1.03]"
+            [class]="hasTakenIelts() === false ? 'border-cyan-500/50 shadow-lg shadow-cyan-500/10' : 'border-white/10 hover:border-white/20'"
+            [style.background]="hasTakenIelts() === false ? 'rgba(6,182,212,0.15)' : 'rgba(255,255,255,0.04)'">
+            <span class="text-3xl block mb-2"></span>
+            <span class="text-white font-semibold text-sm">No, first time</span>
+            <span class="text-white/30 text-xs block mt-1">I'm a newcomer</span>
+          </button>
+        </div>
+        }
+
+        <!-- STEP 3: Current Level -->
+        @if (currentStep() === 3) {
+        <div class="animate-[fadeInUp_0.4s_ease-out] grid grid-cols-2 gap-3 w-full max-w-[440px]">
+          @for (level of levelOptions; track level.value) {
+          <button type="button" (click)="selectLevel(level.value)"
+            class="p-4 rounded-xl border text-center transition-all duration-300 cursor-pointer hover:scale-[1.02]"
+            [class]="currentLevel() === level.value ? 'border-purple-500/50 shadow-lg shadow-purple-500/10' : 'border-white/10 hover:border-white/20'"
+            [style.background]="currentLevel() === level.value ? 'rgba(124,58,237,0.15)' : 'rgba(255,255,255,0.04)'">
+            <span class="text-white font-semibold text-sm block">{{ level.label }}</span>
+            <span class="text-white/30 text-[11px] block mt-0.5">{{ level.desc }}</span>
+            <!-- <span class="text-purple-400/70 text-[10px] font-mono mt-1 block">Band {{ level.band }}</span> -->
+          </button>
+          }
+        </div>
+        }
+
+        <!-- STEP 4: Target Band Slider -->
+        @if (currentStep() === 4) {
+        <div class="animate-[fadeInUp_0.4s_ease-out] text-center w-full max-w-[420px]">
+          <div class="mb-6">
+            <span class="text-6xl font-bold text-white" [style.color]="getBandColor(targetBand())">{{ targetBand()
+              }}</span>
+            <span class="text-lg text-white/40 ml-2">/ 9.0</span>
+            <p class="text-sm mt-2 font-medium" [style.color]="getBandColor(targetBand())">{{ getBandLabel(targetBand())
+              }}</p>
+          </div>
+          <div class="px-2">
+            <input type="range" [min]="4" [max]="9" [step]="0.5" [value]="targetBand()"
+              (input)="onBandSliderChange($event)" class="w-full h-2 rounded-full appearance-none cursor-pointer"
+              style="background: linear-gradient(90deg, #ef4444, #f97316, #eab308, #22c55e, #06b6d4, #8b5cf6);"
+              id="band-slider" />
+            <div class="flex justify-between mt-2 px-1">
+              @for (mark of bandMarks; track mark) {
+              <span class="text-[10px] text-white/30">{{ mark }}</span>
+              }
+            </div>
+          </div>
+        </div>
+        }
+
+        <!-- STEP 5: Exam Date -->
+        @if (currentStep() === 5) {
+        <div class="animate-[fadeInUp_0.4s_ease-out] w-full max-w-[400px] flex flex-col">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Select Your Exam Date</mat-label>
+            <mat-icon matPrefix class="opacity-70 mr-2 text-white">event</mat-icon>
+            <input matInput [matDatepicker]="picker" id="reg-date"
+              [ngModel]="examDate()" (ngModelChange)="examDate.set($event)"
+              (click)="picker.open()" name="examDate" [min]="getMinDate()" readonly
+              class="cursor-pointer" />
+            <mat-datepicker-toggle matSuffix [for]="picker" class="text-white"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+          @if (examDate()) {
+          <p class="text-sm text-purple-300/70 mt-3 text-center">
+            📅 Your exam is on <span class="text-white font-semibold">{{ formatDateDisplay(examDate()) }}</span>
+          </p>
+          }
+        </div>
+        }
+
+        <!-- STEP 6: Reason -->
+        @if (currentStep() === 6) {
+        <div class="animate-[fadeInUp_0.4s_ease-out] grid grid-cols-2 gap-3 w-full max-w-[440px]">
+          @for (opt of reasonOptions; track opt.value) {
+          <button type="button" (click)="selectReason(opt.value)"
+            class="p-4 rounded-xl border text-left transition-all duration-300 cursor-pointer hover:scale-[1.02]"
+            [class]="reason() === opt.value ? 'border-purple-500/50 shadow-lg shadow-purple-500/10' : 'border-white/10 hover:border-white/20'"
+            [style.background]="reason() === opt.value ? 'rgba(124,58,237,0.15)' : 'rgba(255,255,255,0.04)'">
+            <span class="text-2xl block mb-1.5">{{ opt.icon }}</span>
+            <span class="text-white font-semibold text-sm block">{{ opt.label }}</span>
+            <span class="text-white/30 text-[11px] block mt-0.5">{{ opt.desc }}</span>
+          </button>
+          }
+        </div>
+        }
+
+        <!-- STEP 7: Focus Skill -->
+        @if (currentStep() === 7) {
+        <div class="animate-[fadeInUp_0.4s_ease-out] space-y-3 w-full max-w-[420px]">
+          @for (skill of skillOptions; track skill.value) {
+          <button type="button" (click)="selectSkill(skill.value)"
+            class="w-full p-4 rounded-xl border flex items-center gap-4 transition-all duration-300 cursor-pointer hover:scale-[1.02]"
+            [class]="focusSkill() === skill.value ? 'border-purple-500/50 shadow-lg shadow-purple-500/10' : 'border-white/10 hover:border-white/20'"
+            [style.background]="focusSkill() === skill.value ? 'rgba(124,58,237,0.15)' : 'rgba(255,255,255,0.04)'">
+            <span class="text-2xl">{{ skill.icon }}</span>
+            <span class="text-white font-semibold text-sm">{{ skill.label }}</span>
+            @if (focusSkill() === skill.value) {
+            <svg class="w-5 h-5 text-purple-400 ml-auto" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd" />
+            </svg>
+            }
+          </button>
+          }
+        </div>
+        }
+
+        <!-- STEP 8: Credentials -->
+        @if (currentStep() === 8) {
+        <div class="animate-[fadeInUp_0.4s_ease-out] flex flex-col gap-2 w-full max-w-[400px]">
+          <!-- Email -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Email Address</mat-label>
+            <mat-icon matPrefix class="opacity-70 mr-2 text-white">email</mat-icon>
+            <input matInput id="reg-email" type="email" [ngModel]="email()" (ngModelChange)="email.set($event)"
+              name="email" placeholder="you@example.com" autocomplete="email" />
+          </mat-form-field>
+
+          <!-- Password -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Password</mat-label>
+            <mat-icon matPrefix class="opacity-70 mr-2 text-white">lock</mat-icon>
+            <input matInput id="reg-pass" [type]="showPassword() ? 'text' : 'password'" [ngModel]="password()"
+              (ngModelChange)="password.set($event)" name="password" placeholder="Min. 6 characters"
+              autocomplete="new-password" />
+            <button mat-icon-button matSuffix type="button" (click)="togglePasswordVisibility()">
+              <mat-icon class="text-white">{{showPassword() ? 'visibility' : 'visibility_off'}}</mat-icon>
+            </button>
+          </mat-form-field>
+
+          <!-- Confirm Password -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Confirm Password</mat-label>
+            <mat-icon matPrefix class="opacity-70 mr-2 text-white">lock_outline</mat-icon>
+            <input matInput id="reg-confirm" [type]="showConfirmPassword() ? 'text' : 'password'"
+              [ngModel]="confirmPassword()" (ngModelChange)="confirmPassword.set($event)" name="confirmPassword"
+              placeholder="Re-enter password" autocomplete="new-password" />
+            <button mat-icon-button matSuffix type="button" (click)="toggleConfirmPasswordVisibility()">
+              <mat-icon class="text-white">{{showConfirmPassword() ? 'visibility' : 'visibility_off'}}</mat-icon>
+            </button>
+          </mat-form-field>
+
+          @if (password() && confirmPassword() && password() !== confirmPassword()) {
+          <p class="text-red-400/80 text-xs -mt-3 mb-2 px-4">Passwords do not match</p>
+          }
+          @if (password() && confirmPassword() && password() === confirmPassword()) {
+          <p class="text-emerald-400/80 text-xs -mt-3 mb-2 px-4">✓ Passwords match</p>
+          }
+        </div>
+        }
+      </div>
+
+      <!-- ═══════════════ NAVIGATION ═══════════════ -->
+      <div class="flex items-center justify-between mt-8 gap-3">
+        @if (!isFirstStep()) {
+        <button mat-stroked-button type="button" (click)="prevStep()" class="py-6 px-6 border-white/20 text-white/60">
+          ← Back
+        </button>
+        } @else {
+        <div></div>
+        }
+
+        <button mat-flat-button color="primary" type="button" (click)="nextStep()" [disabled]="isLoading()"
+          class="px-8 py-6 text-white font-semibold text-sm shadow-lg tracking-wide"
+          style="background: linear-gradient(135deg, #7c3aed, #6d28d9, #4f46e5); border-radius: 12px;">
+          @if (isLoading()) {
+          <span class="flex items-center gap-2">
+            <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            Creating Account...
+          </span>
+          } @else if (isLastStep()) {
+          Create Account 🚀
+          } @else {
+          Continue →
+          }
+        </button>
+      </div>
+
+      <!-- Sign In Link -->
+      <p class="text-center text-sm text-white/40 mt-6">
+        Already have an account?
+        <a routerLink="/auth/login"
+          class="text-purple-400 hover:text-purple-300 font-semibold transition-colors ml-1">Sign In</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: white;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(124, 58, 237, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: none;
+    background: white;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(124, 58, 237, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+</style>
